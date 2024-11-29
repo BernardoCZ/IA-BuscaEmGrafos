@@ -1,4 +1,4 @@
-# <b>Trabalho 2 - Aprendizado por Reforço</b>
+# <b>Trabalho 3 - Busca em Espaço de Estados</b>
 
 ### Alunos (Todos da Turma A):
 
