@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from asyncio.windows_events import NULL
 from typing import Iterable, Set, Tuple
+from queue import PriorityQueue
 
 class Nodo:
     """
@@ -27,6 +28,11 @@ class Nodo:
         self.pai = pai
         self.acao = acao
         self.custo = custo
+    def __lt__(self, other):
+        return self.estado < other.estado
+
+
+objectivo = "12345678_"
 
 
 def sucessor(estado:str)->Set[Tuple[str,str]]:
@@ -114,9 +120,47 @@ def astar_hamming(estado:str)->list[str]:
     :param estado: str
     :return:
     """
-    # substituir a linha abaixo pelo seu codigo
-    raise NotImplementedError
+    # Inicia nodo com estado enviado
+    inicio = Nodo(estado, NULL, NULL, 0)
 
+    # Conjunto de estados explorados pelo algoritmo
+    explorados = set()
+
+    # fronteira é uma lista de elementos prioritários
+    fronteira = PriorityQueue()
+
+    # O início é adicionado aos estados fronteira
+    fronteira.put((0,inicio))
+    while(True): # Executa até achar estado ótimo ou erro
+        if(fronteira.empty()): # Tudo foi explorado sem sucesso
+            break
+        v = fronteira.get()[1] # Retorna o estado com menor valor na fila, por exemplo em {(1, xx), (2,yy), (3, zz)} retorna xx
+        if(v.estado == objectivo): # Se a fronteira selecionada = objetivo, retorna resultado
+            return caminho(v)
+        if(not v.estado in explorados): # Se a fronteira selecionada não foi explorada
+            explorados.add(v.estado)
+            vizinhos = expande(v)
+            for vizinho in vizinhos: # Para cada estado vizinho do atual
+                if(not vizinho.estado in explorados): # Se o estado vizinho não foi explorado, torna-se fronteira
+                    fronteira.put((vizinho.custo + hamming(vizinho), vizinho))
+
+def hamming(nodo:Nodo)->int:
+    estado = nodo.estado
+    distancia_hamming = 0
+    for i in range(len(estado)):
+        # Comparação de igualdade de caracteres para soma de custo
+        if((estado[i] != '_') and (estado[i] != objectivo[i])):
+            distancia_hamming += 1
+
+    return distancia_hamming
+
+def caminho(nodo:Nodo)->str:
+    acoes = []
+    nodo_Rec = nodo
+    while(nodo_Rec.pai != NULL):
+        acoes.insert(0, nodo_Rec.acao)
+        nodo_Rec = nodo_Rec.pai
+    return acoes
 
 def astar_manhattan(estado:str)->list[str]:
     """
