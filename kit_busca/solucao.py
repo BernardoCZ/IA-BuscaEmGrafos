@@ -1,12 +1,19 @@
 # Permite usar a classe Nodo dentro da classe Nodo
 from __future__ import annotations
 
+from asyncio.windows_events import NULL
 from typing import Iterable, Set, Tuple
 
 class Nodo:
     """
     Implemente a classe Nodo com os atributos descritos na funcao init
     """
+
+    estado = "12345678_"
+    pai = NULL
+    acao = NULL
+    custo = -1
+    filhos = set()
 
     def __init__(self, estado:str, pai:Nodo, acao:str, custo:int):
         """
@@ -79,8 +86,23 @@ def expande(nodo:Nodo)->Set[Nodo]:
     :param nodo: objeto da classe Nodo
     :return:
     """
-    # substituir a linha abaixo pelo seu codigo
-    raise NotImplementedError
+    # Inicializa conjunto de retorno
+    filhos = set()
+
+    # Pega o estado recebido
+    estado = nodo.estado
+
+    # Conjunto de sucessores de um dado estado
+    sucessores = sucessor(estado)
+
+    # Loop por sucessores do estado
+    for s in sucessores:
+        move = s[0]
+        next_state = s[1]
+        filho = Nodo(next_state, nodo, move, nodo.custo + 1)
+        nodo.filhos.add(filho)
+        filhos.add(filho)
+    return filhos
 
 
 def astar_hamming(estado:str)->list[str]:
@@ -107,6 +129,11 @@ def astar_manhattan(estado:str)->list[str]:
     """
     # substituir a linha abaixo pelo seu codigo
     raise NotImplementedError
+
+
+
+
+
 
 #opcional,extra
 def bfs(estado:str)->list[str]:
