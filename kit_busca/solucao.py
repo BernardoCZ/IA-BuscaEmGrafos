@@ -2,8 +2,10 @@
 from __future__ import annotations
 
 from asyncio.windows_events import NULL
+import time
 from typing import Iterable, Set, Tuple
 from queue import PriorityQueue
+import numpy as np
 
 class Nodo:
     """
@@ -131,11 +133,18 @@ def astar_hamming(estado:str)->list[str]:
 
     # O início é adicionado aos estados fronteira
     fronteira.put((0,inicio))
+
+    iteracoes = 0
+    inicio_timer = time.time()
+
     while(True): # Executa até achar estado ótimo ou erro
+        iteracoes = iteracoes + 1
         if(fronteira.empty()): # Tudo foi explorado sem sucesso
             break
         v = fronteira.get()[1] # Retorna o estado com menor valor na fila, por exemplo em {(1, xx), (2,yy), (3, zz)} retorna xx
         if(v.estado == objectivo): # Se a fronteira selecionada = objetivo, retorna resultado
+            fim_timer = time.time()
+            print("\nHamming: iteracoes - " + str(iteracoes) + " /// expandidos - " + str(len(explorados)) + f" /// Tempo de execução - {(fim_timer - inicio_timer):.4f} segundos", end='\n')
             return caminho(v)
         if(not v.estado in explorados): # Se a fronteira selecionada não foi explorada
             explorados.add(v.estado)
@@ -171,8 +180,58 @@ def astar_manhattan(estado:str)->list[str]:
     :param estado: str
     :return:
     """
-    # substituir a linha abaixo pelo seu codigo
-    raise NotImplementedError
+    
+    # Inicia nodo com estado enviado
+    inicio = Nodo(estado, NULL, NULL, 0)
+
+    # Conjunto de estados explorados pelo algoritmo
+    explorados = set()
+
+    # fronteira é uma lista de elementos prioritários
+    fronteira = PriorityQueue()
+
+    # O início é adicionado aos estados fronteira
+    fronteira.put((0,inicio))
+
+    iteracoes = 0
+    inicio_timer = time.time()
+
+    while(True): # Executa até achar estado ótimo ou erro
+        iteracoes = iteracoes + 1
+        if(fronteira.empty()): # Tudo foi explorado sem sucesso
+            break
+        v = fronteira.get()[1] # Retorna o estado com menor valor na fila, por exemplo em {(1, xx), (2,yy), (3, zz)} retorna xx
+        if(v.estado == objectivo): # Se a fronteira selecionada = objetivo, retorna resultado
+            fim_timer = time.time()
+            print("\nManhattan: iteracoes - " + str(iteracoes) + " /// expandidos - " + str(len(explorados)) + f" /// Tempo de execução - {(fim_timer - inicio_timer):.4f} segundos", end='\n')
+            return caminho(v)
+        if(not v.estado in explorados): # Se a fronteira selecionada não foi explorada
+            explorados.add(v.estado)
+            vizinhos = expande(v)
+            for vizinho in vizinhos: # Para cada estado vizinho do atual
+                if(not vizinho.estado in explorados): # Se o estado vizinho não foi explorado, torna-se fronteira
+                    fronteira.put((vizinho.custo + manhattan(vizinho), vizinho))                
+   
+
+def manhattan(nodo:Nodo)->int:
+    distancia_manhattan = 0
+    #transforma o valor do array do estado atual em um grid 3x3 do 8 puzzle
+    state = np.array(list(nodo.estado))
+    grid = state.reshape(3,3)
+    obj = np.array(list(objectivo))
+    target = obj.reshape(3,3)
+    
+    #grid do estado é percorrido e comparado com o objetivo
+    for i in range(3):
+     for j in range(3):
+            if grid[i,j] != '_':
+                v = grid[i,j]
+                posicao_target = np.where(target == v)
+                #quantidade de movimentos necessárias para uma peça estar na sua posição target é acumulada em distancia_manhattan
+                distancia_manhattan += (abs(i - posicao_target[0]) + abs(j - posicao_target[1]))                
+    
+    return distancia_manhattan
+        
 
 
 
@@ -217,3 +276,4 @@ def astar_new_heuristic(estado:str)->list[str]:
     """
     # substituir a linha abaixo pelo seu codigo
     raise NotImplementedError
+    
